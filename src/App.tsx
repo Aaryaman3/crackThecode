@@ -136,7 +136,7 @@ function App() {
       DbConnection.builder()
         .withUri('ws://localhost:3000')
 
-        .withModuleName('newchat')
+        .withModuleName('hophacks-chat')
         .withToken(localStorage.getItem('auth_token') || '')
         .onConnect(onConnect)
         .onDisconnect(onDisconnect)
