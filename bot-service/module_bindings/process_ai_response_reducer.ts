@@ -33,30 +33,38 @@ import {
   type SubscriptionEventContextInterface,
 } from "@clockworklabs/spacetimedb-sdk";
 
-export type SetName = {
-  name: string,
+export type ProcessAiResponse = {
+  messageId: bigint,
+  aiResponse: string,
+  vulnerabilityTriggered: string | undefined,
+  secretLeaked: boolean,
+  severityScore: number,
 };
 
 /**
  * A namespace for generated helper functions.
  */
-export namespace SetName {
+export namespace ProcessAiResponse {
   /**
   * A function which returns this type represented as an AlgebraicType.
   * This function is derived from the AlgebraicType used to generate this type.
   */
   export function getTypeScriptAlgebraicType(): AlgebraicType {
     return AlgebraicType.createProductType([
-      new ProductTypeElement("name", AlgebraicType.createStringType()),
+      new ProductTypeElement("messageId", AlgebraicType.createU64Type()),
+      new ProductTypeElement("aiResponse", AlgebraicType.createStringType()),
+      new ProductTypeElement("vulnerabilityTriggered", AlgebraicType.createOptionType(AlgebraicType.createStringType())),
+      new ProductTypeElement("secretLeaked", AlgebraicType.createBoolType()),
+      new ProductTypeElement("severityScore", AlgebraicType.createI32Type()),
     ]);
   }
 
-  export function serialize(writer: BinaryWriter, value: SetName): void {
-    SetName.getTypeScriptAlgebraicType().serialize(writer, value);
+  export function serialize(writer: BinaryWriter, value: ProcessAiResponse): void {
+    ProcessAiResponse.getTypeScriptAlgebraicType().serialize(writer, value);
   }
 
-  export function deserialize(reader: BinaryReader): SetName {
-    return SetName.getTypeScriptAlgebraicType().deserialize(reader);
+  export function deserialize(reader: BinaryReader): ProcessAiResponse {
+    return ProcessAiResponse.getTypeScriptAlgebraicType().deserialize(reader);
   }
 
 }

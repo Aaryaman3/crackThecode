@@ -4,8 +4,12 @@ import {
   DbConnection,
   ErrorContext,
   EventContext,
-  Message,
-  User,
+  Messages,
+  Users,
+  GameRooms,
+  RoomTemplate,
+  AiReplies,
+  Leaderboard,
 } from './module_bindings';
 import { Identity } from '@clockworklabs/spacetimedb-sdk';
 
