@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ----- CSS Reset & Global Settings ----- */
 *,
 *::before,
@@ -9,18 +14,15 @@
 
 /* ----- Color Variables ----- */
 :root {
-  --theme-color: #3dc373;
-  --theme-color-contrast: #08180e;
-  --textbox-color: #edfef4;
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --theme-color: #4cf490;
-    --theme-color-contrast: #132219;
-    --textbox-color: #0f311d;
-  }
+  --theme-color: #00f3ff;
+  --theme-color-contrast: #ffffff;
+  --textbox-color: #f8f8f8;
+  --neon-blue: #00f3ff;
+  --neon-purple: #bd00ff;
+  --neon-pink: #ff0080;
+  --dark-bg: #ffffff;
+  --dark-surface: #f8f8f8;
+  color-scheme: light;
 }
 
 /* ----- Page Setup ----- */
@@ -29,14 +31,114 @@ body,
 #root {
   height: 100%;
   margin: 0;
+  background: var(--dark-bg);
+  color: var(--neon-blue);
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'VT323', monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--dark-bg);
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(0, 243, 255, 0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* ----- Arcade Theme Utilities ----- */
+.pixel-border {
+  border: 4px solid var(--neon-blue);
+  border-style: dashed;
+  image-rendering: pixelated;
+}
+
+.neon-glow {
+  box-shadow: 
+    0 0 5px var(--neon-blue),
+    0 0 10px var(--neon-blue),
+    0 0 15px var(--neon-blue);
+}
+
+.neon-glow-purple {
+  box-shadow: 
+    0 0 5px var(--neon-purple),
+    0 0 10px var(--neon-purple),
+    0 0 15px var(--neon-purple);
+}
+
+.neon-glow-pink {
+  box-shadow: 
+    0 0 5px var(--neon-pink),
+    0 0 10px var(--neon-pink),
+    0 0 15px var(--neon-pink);
+}
+
+.arcade-button {
+  @apply bg-dark-surface border-3 border-neon-blue text-neon-blue font-retro px-4 py-2;
+  transition: all 0.2s ease;
+  image-rendering: pixelated;
+}
+
+.arcade-button:hover {
+  @apply bg-neon-blue text-dark-bg;
+  box-shadow: 
+    0 0 10px var(--neon-blue),
+    0 0 20px var(--neon-blue);
+}
+
+.retro-card {
+  @apply bg-dark-surface border-3 border-neon-purple p-4;
+  background-image: 
+    linear-gradient(45deg, transparent 49%, rgba(189, 0, 255, 0.1) 50%, transparent 51%);
+  background-size: 8px 8px;
+}
+
+.typewriter-text {
+  overflow: hidden;
+  border-right: 2px solid var(--neon-blue);
+  white-space: nowrap;
+  animation: typewriter 3s steps(40, end) forwards, blink-caret 0.75s step-end infinite;
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: var(--neon-blue); }
+}
+
+/* ----- Scrollbar Styling ----- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neon-blue);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-purple);
+}
+
+/* ----- Mantine Overrides ----- */
+.mantine-Modal-modal {
+  background: var(--dark-surface) !important;
+  border: 3px solid var(--neon-pink) !important;
+}
+
+.mantine-TextInput-input {
+  background: var(--dark-surface) !important;
+  border: 2px solid var(--neon-blue) !important;
+  color: var(--neon-blue) !important;
+  font-family: 'VT323', monospace !important;
+}
+
+.mantine-TextInput-input:focus {
+  border-color: var(--neon-pink) !important;
+  box-shadow: 0 0 10px var(--neon-pink) !important;
 }
 
 code {
