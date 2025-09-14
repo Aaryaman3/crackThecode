@@ -11,6 +11,13 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
   const isPlayer = message.sender === 'player';
   const isLLM = message.sender === 'llm';
 
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -33,19 +40,16 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
           <div className={`w-2 h-2 rounded-full ${
             isPlayer ? 'bg-neon-blue' : isLLM ? 'bg-neon-purple' : 'bg-gray-500'
           }`} />
-          <Text className="font-pixel text-xs uppercase">
-            {isPlayer ? 'YOU' : isLLM ? 'AI SYSTEM' : 'SYSTEM'}
+          <Text className="font-mono text-xs uppercase">
+            {message.sender === 'player' ? 'PLAYER' : 'AI ASSISTANT'}
           </Text>
-          <Text className="font-retro text-xs text-gray-400">
-            {new Date(message.timestamp).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
+          <Text className="font-body text-xs text-gray-400">
+            {formatTime(message.timestamp)}
           </Text>
         </div>
 
         {/* Message Content */}
-        <Text className="font-retro text-sm leading-relaxed whitespace-pre-wrap">
+        <Text className="font-body text-sm leading-relaxed whitespace-pre-wrap">
           {isLLM && message.content.includes('CONGRATULATIONS') ? (
             <motion.span
               initial={{ opacity: 0 }}

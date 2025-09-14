@@ -7,9 +7,6 @@ import LandingPage from './components/LandingPage';
 import RoomPage from './components/RoomPage';
 import { DbConnection } from './module_bindings';
 
-// Export types for use in other components
-export type { DbConnection };
-
 // Mantine theme with arcade colors
 const arcadeTheme = createTheme({
   colors: {
@@ -51,9 +48,9 @@ const arcadeTheme = createTheme({
     ],
   },
   primaryColor: 'neon-blue',
-  fontFamily: 'VT323, monospace',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   headings: {
-    fontFamily: 'Press Start 2P, monospace',
+    fontFamily: 'Orbitron, monospace',
   },
 });
 
@@ -73,6 +70,7 @@ export interface LeaderboardEntry {
   timestamp: string;
   roomName: string;
   messageCount: number;
+  durationSeconds: number; // Time taken to complete in seconds
 }
 
 export interface ChatMessage {
@@ -83,13 +81,14 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+export type { DbConnection };
+
 const ArcadeGameApp: React.FC = () => {
   const [currentView, setCurrentView] = useState<'landing' | 'room'>('landing');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [playerName, setPlayerName] = useState<string>('');
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [connection, setConnection] = useState<DbConnection | null>(null);
-  // Removed unused identity state
 
   // Default templates (5 predefined)
   const defaultTemplates: Template[] = [
@@ -169,6 +168,8 @@ const ArcadeGameApp: React.FC = () => {
           .build();
       } catch (error) {
         console.error('Failed to connect to SpacetimeDB:', error);
+        // For development, allow the app to work without SpacetimeDB
+        setIsConnected(true);
       }
     };
 
@@ -200,7 +201,7 @@ const ArcadeGameApp: React.FC = () => {
       <MantineProvider theme={arcadeTheme}>
         <div className="min-h-screen bg-dark-bg flex items-center justify-center">
           <div className="text-center">
-            <h1 className="font-pixel text-2xl text-neon-blue mb-4 typewriter-text">
+            <h1 className="font-heading text-2xl text-neon-blue mb-4 typewriter-text">
               CONNECTING...
             </h1>
             <div className="w-16 h-16 border-3 border-neon-blue border-dashed rounded-full animate-spin mx-auto"></div>

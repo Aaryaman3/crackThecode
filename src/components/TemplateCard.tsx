@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card, Text, Badge, Button, Group } from '@mantine/core';
 import { IconBolt, IconShield, IconSkull } from '@tabler/icons-react';
 import { Template } from '../ArcadeGameApp';
@@ -38,17 +39,29 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
   const isCustom = template.createdBy !== 'system';
 
   return (
-    <Card
-      className={`
-        bg-dark-surface border-2 transition-all duration-300 cursor-pointer
-        hover:border-neon-pink hover:shadow-lg hover:-translate-y-1
-        ${isCustom ? 'border-neon-purple' : 'border-neon-blue'}
-      `}
-      onClick={onSelect}
-      style={{
-        backgroundImage: 'linear-gradient(135deg, transparent 40%, rgba(0, 243, 255, 0.05) 100%)',
+    <motion.div
+      whileHover={{ 
+        scale: 1.05, 
+        y: -5,
+        rotate: 1
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 20 
       }}
     >
+      <Card
+        className={`
+          bg-dark-surface border-2 transition-all duration-300 cursor-pointer glow-hover
+          ${isCustom ? 'border-neon-purple' : 'border-neon-blue'}
+        `}
+        onClick={onSelect}
+        style={{
+          backgroundImage: `linear-gradient(135deg, transparent 40%, ${isCustom ? 'rgba(142, 68, 255, 0.05)' : 'rgba(0, 212, 255, 0.05)'} 100%)`,
+        }}
+      >
       <div className="flex items-center gap-4">
         {/* Icon */}
         <div className="flex-shrink-0">
@@ -63,17 +76,17 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <Text className="font-pixel text-lg text-neon-blue truncate">
+            <Text className="font-heading text-lg text-neon-blue truncate">
               {template.name}
             </Text>
             {isCustom && (
-              <Badge size="xs" className="bg-neon-purple text-dark-bg font-retro">
+              <Badge size="xs" className="bg-neon-purple text-dark-bg font-body">
                 CUSTOM
               </Badge>
             )}
           </div>
           
-          <Text className="font-retro text-sm text-gray-300 mb-3 line-clamp-2">
+          <Text className="font-body text-sm text-gray-300 mb-3 line-clamp-2">
             {template.tagline}
           </Text>
 
@@ -81,7 +94,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
             <Badge
               variant="outline"
               size="sm"
-              className={`font-retro ${getDifficultyColor(template.difficulty)} bg-transparent`}
+              className={`font-body ${getDifficultyColor(template.difficulty)} bg-transparent`}
               leftSection={getDifficultyIcon(template.difficulty)}
             >
               {template.difficulty.toUpperCase()}
@@ -106,11 +119,12 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => {
         absolute inset-0 border-2 border-transparent transition-all duration-300
         ${isCustom ? 'hover:border-neon-purple' : 'hover:border-neon-pink'}
       `} style={{
-        background: `linear-gradient(45deg, transparent, ${isCustom ? '#bd00ff' : '#ff0080'}20, transparent)`,
+        background: `linear-gradient(45deg, transparent, ${isCustom ? '#8E44FF' : '#ff0080'}20, transparent)`,
         mask: 'linear-gradient(white, white) padding-box, linear-gradient(white, white)',
         maskComposite: 'exclude',
       }} />
     </Card>
+    </motion.div>
   );
 };
 

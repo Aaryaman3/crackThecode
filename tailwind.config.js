@@ -11,11 +11,11 @@ export default {
         'retro': ['VT323', 'monospace'],
       },
       colors: {
-        'neon-blue': '#00f3ff',
-        'neon-purple': '#bd00ff',
-        'neon-pink': '#ff0080',
-        'dark-bg': '#ffffff',
-        'dark-surface': '#f8f8f8',
+        'neon-blue': '#4D96FF',
+        'neon-purple': '#FF6B6B',
+        'neon-pink': '#FF6B6B',
+        'dark-bg': '#FFF8E7',
+        'dark-surface': '#FFFFFF',
       },
       borderWidth: {
         '3': '3px',
@@ -28,8 +28,8 @@ export default {
       },
       keyframes: {
         glow: {
-          '0%': { boxShadow: '0 0 5px #00f3ff, 0 0 10px #00f3ff, 0 0 15px #00f3ff' },
-          '100%': { boxShadow: '0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 30px #00f3ff' },
+          '0%': { boxShadow: '0 0 5px #4D96FF, 0 0 10px #4D96FF, 0 0 15px #4D96FF' },
+          '100%': { boxShadow: '0 0 10px #4D96FF, 0 0 20px #4D96FF, 0 0 30px #4D96FF' },
         },
         typewriter: {
           '0%': { width: '0' },
