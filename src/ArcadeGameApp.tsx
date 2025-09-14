@@ -5,7 +5,10 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import LandingPage from './components/LandingPage';
 import RoomPage from './components/RoomPage';
-import { DbConnection } from './module_bindings';
+import SpectatorView from './components/SpectatorView';
+import { ActiveGame } from './components/ActiveGames';
+import { DbConnection, Leaderboard } from './module_bindings';
+import { Identity } from '@clockworklabs/spacetimedb-sdk';
 
 // Mantine theme with arcade colors
 const arcadeTheme = createTheme({
@@ -84,11 +87,13 @@ export interface ChatMessage {
 export type { DbConnection };
 
 const ArcadeGameApp: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'landing' | 'room'>('landing');
+  const [currentView, setCurrentView] = useState<'landing' | 'room' | 'spectator'>('landing');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [spectatingGame, setSpectatingGame] = useState<ActiveGame | null>(null);
   const [playerName, setPlayerName] = useState<string>('');
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [connection, setConnection] = useState<DbConnection | null>(null);
+  const [identity, setIdentity] = useState<Identity | null>(null);
 
   // Default templates (5 predefined)
   const defaultTemplates: Template[] = [
@@ -147,6 +152,26 @@ const ArcadeGameApp: React.FC = () => {
   const [templates, setTemplates] = useState<Template[]>(defaultTemplates);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
+  // Load leaderboard from SpacetimeDB
+  const loadLeaderboardFromDB = (conn: DbConnection) => {
+    try {
+      const dbLeaderboard = Array.from(conn.db.leaderboard.iter());
+      const entries: LeaderboardEntry[] = dbLeaderboard.map(entry => ({
+        playerName: entry.username,
+        timestamp: entry.updatedAt.toString(),
+        roomName: entry.roomId,
+        messageCount: 0, // Not available in DB schema, will use default
+        durationSeconds: entry.extractionTime || entry.score
+      }));
+      setLeaderboard(entries.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      ));
+      console.log('📊 Loaded leaderboard from SpacetimeDB:', entries.length, 'entries');
+    } catch (error) {
+      console.error('❌ Failed to load leaderboard from SpacetimeDB:', error);
+    }
+  };
+
   useEffect(() => {
     // Initialize SpacetimeDB connection
     const initConnection = async () => {
@@ -155,14 +180,29 @@ const ArcadeGameApp: React.FC = () => {
           .withUri('wss://maincloud.spacetimedb.com')
           .withModuleName('crackthecode')
           .withToken(localStorage.getItem('auth_token') || '')
-          .onConnect((conn, _identity, token) => {
+          .onConnect((conn, connIdentity, token) => {
             setConnection(conn);
+            setIdentity(connIdentity);
             setIsConnected(true);
             localStorage.setItem('auth_token', token);
             console.log('Connected to SpacetimeDB');
+
+            // Subscribe to leaderboard and other tables for real-time sync
+            conn.subscriptionBuilder()
+              .onApplied(() => {
+                console.log('📊 SpacetimeDB data synchronized');
+                // Load leaderboard data from SpacetimeDB when it updates
+                loadLeaderboardFromDB(conn);
+              })
+              .subscribe([
+                'SELECT * FROM leaderboard',
+                'SELECT * FROM game_rooms',
+                'SELECT * FROM users'
+              ]);
           })
           .onDisconnect(() => {
             setIsConnected(false);
+            setIdentity(null);
             console.log('Disconnected from SpacetimeDB');
           })
           .build();
@@ -177,6 +217,23 @@ const ArcadeGameApp: React.FC = () => {
   }, []);
 
   const handleEnterRoom = (template: Template) => {
+    // Store username and create/join room in SpacetimeDB for cross-device persistence
+    if (connection && identity && playerName) {
+      try {
+        // Set username in SpacetimeDB
+        connection.reducers.setUsername(playerName);
+        
+        // Create room for this template
+        connection.reducers.createRoom(template.id, 6); // max 6 players
+        
+        console.log('🚪 Room created/joined via SpacetimeDB:', template.name, 'by', playerName);
+      } catch (error) {
+        console.error('❌ Failed to enter room via SpacetimeDB:', error);
+      }
+    } else {
+      console.warn('⚠️ Cannot save to SpacetimeDB: missing connection, identity, or playerName');
+    }
+    
     setSelectedTemplate(template);
     setCurrentView('room');
   };
@@ -186,14 +243,51 @@ const ArcadeGameApp: React.FC = () => {
     setCurrentView('landing');
   };
 
+  const handleWatchGame = (game: ActiveGame) => {
+    setSpectatingGame(game);
+    setCurrentView('spectator');
+  };
+
+  const handleLeaveSpectator = () => {
+    setSpectatingGame(null);
+    setCurrentView('landing');
+  };
+
   const handleAddTemplate = (newTemplate: Template) => {
+    // Add to local state immediately for responsive UI
     setTemplates(prev => [...prev, newTemplate]);
+    
+    // Save template to SpacetimeDB for cross-device persistence
+    if (connection && identity) {
+      try {
+        // Note: Template storage would need custom reducer in SpacetimeDB
+        // For now, templates are stored locally only
+        console.log('📝 Template added locally (full SpacetimeDB integration needs custom schema):', newTemplate);
+      } catch (error) {
+        console.error('❌ Failed to save template to SpacetimeDB:', error);
+      }
+    }
   };
 
   const handleCodeCracked = (entry: LeaderboardEntry) => {
+    // Add to local state immediately for responsive UI
     setLeaderboard(prev => [...prev, entry].sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     ));
+
+    // Save to SpacetimeDB for cross-device synchronization
+    if (connection && identity) {
+      try {
+        connection.reducers.updateRoomLeaderboard(
+          entry.roomName, 
+          identity, 
+          entry.durationSeconds
+        );
+        console.log('✅ Leaderboard entry saved to SpacetimeDB:', entry);
+      } catch (error) {
+        console.error('❌ Failed to save leaderboard entry to SpacetimeDB:', error);
+      }
+    }
   };
 
   if (!isConnected) {
@@ -221,10 +315,11 @@ const ArcadeGameApp: React.FC = () => {
             leaderboard={leaderboard}
             onEnterRoom={handleEnterRoom}
             onAddTemplate={handleAddTemplate}
+            onWatchGame={handleWatchGame}
             playerName={playerName}
             onSetPlayerName={setPlayerName}
           />
-        ) : (
+        ) : currentView === 'room' ? (
           <RoomPage
             template={selectedTemplate!}
             leaderboard={leaderboard.filter(entry => entry.roomName === selectedTemplate?.name)}
@@ -232,6 +327,14 @@ const ArcadeGameApp: React.FC = () => {
             onCodeCracked={handleCodeCracked}
             playerName={playerName}
             connection={connection}
+          />
+        ) : (
+          <SpectatorView
+            template={spectatingGame!.template}
+            roomId={spectatingGame!.roomId}
+            playerName={playerName}
+            hostName={spectatingGame!.hostName}
+            onLeaveSpectator={handleLeaveSpectator}
           />
         )}
       </div>

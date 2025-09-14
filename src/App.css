@@ -15,6 +15,79 @@
   margin: 0 auto;
 }
 
+/* Neon colors */
+:root {
+  --neon-blue: #00f3ff;
+  --neon-purple: #bd00ff;
+  --neon-pink: #ff0080;
+  --neon-green: #00ff88;
+  --dark-bg: #0a0a0a;
+  --dark-surface: #1a1a2e;
+  --theme-color: var(--neon-blue);
+  --textbox-color: rgba(26, 26, 46, 0.8);
+}
+
+/* Neon button styles */
+.neon-button-blue {
+  background: linear-gradient(135deg, var(--neon-blue), #0099cc);
+  color: white;
+  border: none;
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.neon-button-blue:hover {
+  box-shadow: 0 0 30px rgba(0, 243, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Retro card styles */
+.retro-card {
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(0, 0, 0, 0.95) 100%);
+  border: 2px solid var(--neon-blue);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+/* Neon glow effects */
+.neon-glow-blue {
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+}
+
+.neon-glow-purple {
+  box-shadow: 0 0 20px rgba(189, 0, 255, 0.2);
+}
+
+.neon-glow-pink {
+  box-shadow: 0 0 20px rgba(255, 0, 128, 0.2);
+}
+
+.neon-glow-green {
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+/* Text colors */
+.text-neon-blue { color: var(--neon-blue); }
+.text-neon-purple { color: var(--neon-purple); }
+.text-neon-pink { color: var(--neon-pink); }
+.text-neon-green { color: var(--neon-green); }
+
+/* Dark background */
+.bg-dark-bg {
+  background-color: var(--dark-bg);
+  min-height: 100vh;
+}
+
+/* Font families */
+.font-heading {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+}
+
+.font-body {
+  font-family: 'Inter', sans-serif;
+}
+
 /* ----- Profile (Row 1, spans both columns) ----- */
 .profile {
   grid-column: 1 / 3;
@@ -114,3 +187,88 @@
     box-shadow: 0 0 0 1px #17492b;
   }
 }
+
+/* Live Games specific styles */
+.live-game-card {
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.9) 0%, rgba(0, 0, 0, 0.9) 100%);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  transition: all 0.3s ease;
+}
+
+.live-game-card:hover {
+  border-color: rgba(0, 255, 136, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 255, 136, 0.1);
+}
+
+.game-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.game-status-active {
+  background-color: var(--neon-green);
+  animation: pulse 2s infinite;
+}
+
+.game-status-paused {
+  background-color: #ffd700;
+}
+
+.game-status-completed {
+  background-color: var(--neon-blue);
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced button styles for live games */
+.spectate-button {
+  background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+  border: none;
+  color: white;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.spectate-button:hover {
+  box-shadow: 0 0 25px rgba(0, 243, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Stats grid styling */
+.stats-grid {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(20, 20, 40, 0.6) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+/* Border gradient utilities */
+.border-neon-gradient {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-pink)) 1;
+}
+
+/* Additional neon color variations */
+.text-neon-cyan { color: #00f3ff; }
+.text-neon-yellow { color: #ffff00; }
+.bg-neon-green-10 { background-color: rgba(0, 255, 136, 0.1); }
+.bg-neon-blue-10 { background-color: rgba(0, 243, 255, 0.1); }
+.bg-neon-purple-10 { background-color: rgba(189, 0, 255, 0.1); }

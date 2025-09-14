@@ -91,7 +91,8 @@ pub struct AiReplies {
 
 // Game results and scoring
 #[spacetimedb::table(name = game_result, public)]
-pub struct GameResult {
+pub struct Ga
+Result {
     #[primary_key]
     #[auto_inc]
     id: u64,

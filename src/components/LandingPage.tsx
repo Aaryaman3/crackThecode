@@ -17,12 +17,15 @@ import { IconPlus, IconTrophy, IconClock, IconMessages } from '@tabler/icons-rea
 import { Template, LeaderboardEntry } from '../ArcadeGameApp';
 import Leaderboard from './Leaderboard';
 import TemplateCard from './TemplateCard';
+import ActiveGames, { ActiveGame } from './ActiveGames';
+import ConversationReplay from './ConversationReplay';
 
 interface LandingPageProps {
   templates: Template[];
   leaderboard: LeaderboardEntry[];
   onEnterRoom: (template: Template) => void;
   onAddTemplate: (template: Template) => void;
+  onWatchGame: (game: ActiveGame) => void;
   playerName: string;
   onSetPlayerName: (name: string) => void;
 }
@@ -32,6 +35,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
   leaderboard,
   onEnterRoom,
   onAddTemplate,
+  onWatchGame,
   playerName,
   onSetPlayerName,
 }) => {
@@ -44,6 +48,15 @@ const LandingPage: React.FC<LandingPageProps> = ({
     difficulty: 'medium' as 'easy' | 'medium' | 'hard',
   });
   const [nameModalOpen, setNameModalOpen] = useState(!playerName);
+  const [viewingConversation, setViewingConversation] = useState<LeaderboardEntry | null>(null);
+
+  const handleViewConversation = (entry: LeaderboardEntry) => {
+    setViewingConversation(entry);
+  };
+
+  const handleBackToLanding = () => {
+    setViewingConversation(null);
+  };
 
   const handleCreateTemplate = () => {
     if (newTemplate.name && newTemplate.tagline && newTemplate.secretCode) {
@@ -77,7 +90,14 @@ const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <>
+      {viewingConversation ? (
+        <ConversationReplay 
+          entry={viewingConversation} 
+          onBack={handleBackToLanding} 
+        />
+      ) : (
+        <div className="min-h-screen bg-dark-bg">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div 
@@ -126,30 +146,56 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* Main Content Grid */}
         <Grid gutter="xl">
-          {/* Left Side - Leaderboard */}
+          {/* Left Side - Leaderboard and Live Games */}
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ 
-                duration: 0.6, 
-                delay: 0.2, 
-                type: "spring",
-                stiffness: 100,
-                damping: 10
-              }}
-              className="h-full"
-            >
-              <Card className="retro-card neon-glow-purple h-full glow-hover-purple">
-                <div className="flex items-center gap-3 mb-6">
-                  <IconTrophy size={32} className="text-neon-purple" />
-                  <Title order={2} className="font-heading text-2xl text-neon-purple">
-                    GLOBAL LEADERBOARD
-                  </Title>
-                </div>
-                <Leaderboard entries={leaderboard} showRoom={true} />
-              </Card>
-            </motion.div>
+            <div className="space-y-6">
+              {/* Leaderboard - Top Half */}
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: 0.2, 
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 10
+                }}
+                className="h-[350px]"
+              >
+                <Card className="retro-card neon-glow-purple h-full glow-hover-purple">
+                  <div className="flex items-center gap-3 mb-6">
+                    <IconTrophy size={32} className="text-neon-purple" />
+                    <Title order={2} className="font-heading text-2xl text-neon-purple">
+                      GLOBAL LEADERBOARD
+                    </Title>
+                  </div>
+                  <Leaderboard 
+                    entries={leaderboard} 
+                    showRoom={true} 
+                    onViewConversation={handleViewConversation}
+                  />
+                </Card>
+              </motion.div>
+
+              {/* Live Games - Bottom Half */}
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: 0.4, 
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 10
+                }}
+                className="h-[350px]"
+              >
+                <ActiveGames 
+                  onWatchGame={onWatchGame}
+                  onRefresh={() => console.log('Refreshing games...')}
+                />
+              </motion.div>
+            </div>
           </Grid.Col>
 
           {/* Right Side - Templates */}
@@ -159,7 +205,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ 
                 duration: 0.6, 
-                delay: 0.4, 
+                delay: 0.6, 
                 type: "spring",
                 stiffness: 100,
                 damping: 10
@@ -168,7 +214,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             >
               <Card className="retro-card neon-glow h-full glow-hover">
                 <div className="flex items-center justify-between mb-6">
-                                  <Title order={2} className="font-heading text-2xl text-neon-blue">
+                  <Title order={2} className="font-heading text-2xl text-neon-blue">
                     ATTACK SCENARIOS
                   </Title>
                   <Button
@@ -381,7 +427,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
           </Group>
         </div>
       </Modal>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 

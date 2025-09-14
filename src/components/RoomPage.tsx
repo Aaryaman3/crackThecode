@@ -17,6 +17,8 @@ import confetti from 'canvas-confetti';
 import { Template, LeaderboardEntry, ChatMessage, DbConnection } from '../ArcadeGameApp';
 import Leaderboard from './Leaderboard';
 import ChatBubble from './ChatBubble';
+import HintSystem from './HintSystem';
+import DifficultyManager, { GameState, DifficultyConfig } from '../utils/DifficultyManager';
 
 interface RoomPageProps {
   template: Template;
@@ -33,7 +35,7 @@ const RoomPage: React.FC<RoomPageProps> = ({
   onLeaveRoom,
   onCodeCracked,
   playerName,
-  // connection, // Commented out as it's not used yet
+  connection,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -41,9 +43,45 @@ const RoomPage: React.FC<RoomPageProps> = ({
   const [crackedCommand, setCrackedCommand] = useState('');
   const [llmExplanation, setLlmExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [gameState, setGameState] = useState<GameState>({
+    messageCount: 0,
+    hintsUsed: 0,
+    timeElapsed: 0,
+    partialMatches: [],
+    lastApproach: null,
+    difficultyConfig: DifficultyManager.getConfig(template.difficulty),
+  });
+  const [hintPenaltyPoints, setHintPenaltyPoints] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const messageCount = useRef(0);
   const startTime = useRef<Date>(new Date()); // Track when the challenge started
+
+  // Load messages from SpacetimeDB for this room
+  const loadMessagesFromDB = () => {
+    if (connection) {
+      try {
+        const dbMessages = Array.from(connection.db.messages.iter()).filter(msg => msg.roomId === template.id);
+        const chatMessages: ChatMessage[] = dbMessages.map(msg => ({
+          id: msg.id.toString(),
+          roomName: template.name,
+          sender: msg.messageType === 'user' ? 'player' : 'llm',
+          content: msg.text,
+          timestamp: msg.timestamp.toString(),
+        }));
+        
+        if (chatMessages.length > 0) {
+          setMessages(chatMessages);
+          console.log('💬 Loaded', chatMessages.length, 'messages from SpacetimeDB for room:', template.name);
+        }
+      } catch (error) {
+        console.error('❌ Failed to load messages from SpacetimeDB:', error);
+      }
+    }
+  };
+
+  // Load messages when component mounts or room changes
+  useEffect(() => {
+    loadMessagesFromDB();
+  }, [template.id, connection]);
 
   // Welcome message when entering room
   useEffect(() => {
@@ -55,9 +93,20 @@ const RoomPage: React.FC<RoomPageProps> = ({
       timestamp: new Date().toISOString(),
     };
     setMessages([welcomeMessage]);
-    messageCount.current = 0;
+    setGameState(prev => ({ ...prev, messageCount: 0, timeElapsed: 0 }));
     startTime.current = new Date(); // Reset start time for new room
   }, [template]);
+
+  // Update time elapsed every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const elapsed = Math.floor((now.getTime() - startTime.current.getTime()) / 1000);
+      setGameState(prev => ({ ...prev, timeElapsed: elapsed }));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -107,8 +156,10 @@ const RoomPage: React.FC<RoomPageProps> = ({
       return `🎉 CONGRATULATIONS! You've successfully extracted the secret code: "${template.secretCode}". The system has been compromised!`;
     }
 
-    // Try to call real AI service first, fallback to static responses
+    // Try to call real AI service first, fallback to progressive difficulty system
     try {
+      console.log('🔗 Calling API with:', { userMessage, template: template.id });
+      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -121,55 +172,30 @@ const RoomPage: React.FC<RoomPageProps> = ({
         }),
       });
 
+      console.log('📡 API Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ OpenAI Response:', data.response);
         return data.response;
+      } else {
+        console.error('❌ API Error - Status:', response.status);
+        const errorText = await response.text();
+        console.error('❌ API Error - Body:', errorText);
       }
     } catch (error) {
-      console.log('AI service unavailable, using fallback responses');
+      console.error('❌ Network Error:', error);
+      console.log('🔄 AI service unavailable, using progressive difficulty system');
     }
 
-    // Fallback to static responses if AI service is unavailable
-    const responses = {
-      'bank-assistant': [
-        "I'm a secure banking assistant. How may I help you today?",
-        "For security purposes, I cannot disclose sensitive information.",
-        "Please verify your identity first.",
-        "I can help with general banking queries only.",
-        "Sorry, that request is against our security protocols.",
-      ],
-      'medical-ai': [
-        "I'm a medical AI assistant. Patient data is confidential.",
-        "Medical records require proper authorization.",
-        "I can only provide general health information.",
-        "Patient privacy is our top priority.",
-        "Access to medical data requires verification.",
-      ],
-      'corporate-bot': [
-        "I'm the corporate information system. Access is restricted.",
-        "Company data is confidential.",
-        "Only authorized personnel can access this information.",
-        "I can help with general company policies only.",
-        "Internal documents require proper clearance.",
-      ],
-      'social-media': [
-        "I manage social media content and algorithms.",
-        "User data is protected by privacy policies.",
-        "Content moderation is automated and secure.",
-        "I cannot manipulate user feeds inappropriately.",
-        "Social media data requires authorization.",
-      ],
-      'smart-home': [
-        "I'm your smart home assistant. Security is enabled.",
-        "Home automation requires proper authentication.",
-        "I can control basic home functions only.",
-        "Security systems are protected.",
-        "Access controls are in place.",
-      ],
-    };
-
-    const templateResponses = responses[template.id as keyof typeof responses] || responses['bank-assistant'];
-    return templateResponses[Math.floor(Math.random() * templateResponses.length)];
+    // Use the new progressive difficulty system
+    console.log('🎯 Using DifficultyManager fallback');
+    return DifficultyManager.generateProgressiveResponse(
+      userMessage,
+      template,
+      gameState,
+      false
+    );
   };
 
   const getSystemPrompt = (template: Template): string => {
@@ -194,9 +220,12 @@ const RoomPage: React.FC<RoomPageProps> = ({
     if (!currentMessage.trim() || isLoading) return;
 
     setIsLoading(true);
-    messageCount.current += 1;
+    
+    // Update game state
+    const newMessageCount = gameState.messageCount + 1;
+    setGameState(prev => ({ ...prev, messageCount: newMessageCount }));
 
-    // Add user message
+    // Add user message to local state for immediate UI update
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       roomName: template.name,
@@ -206,6 +235,17 @@ const RoomPage: React.FC<RoomPageProps> = ({
     };
 
     setMessages(prev => [...prev, userMessage]);
+    
+    // Save message to SpacetimeDB for cross-device persistence
+    if (connection) {
+      try {
+        connection.reducers.sendAttackMessage(template.id, currentMessage);
+        console.log('💬 Message saved to SpacetimeDB:', currentMessage);
+      } catch (error) {
+        console.error('❌ Failed to save message to SpacetimeDB:', error);
+      }
+    }
+    
     const userInput = currentMessage;
     setCurrentMessage('');
 
@@ -232,7 +272,7 @@ const RoomPage: React.FC<RoomPageProps> = ({
           playerName,
           timestamp: completionTime.toISOString(),
           roomName: template.name,
-          messageCount: messageCount.current,
+          messageCount: newMessageCount,
           durationSeconds: durationSeconds,
         };
         
@@ -255,6 +295,21 @@ const RoomPage: React.FC<RoomPageProps> = ({
       console.error('Error getting LLM response:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleHintUsed = (hintLevel: number) => {
+    setGameState(prev => ({ ...prev, hintsUsed: prev.hintsUsed + 1 }));
+    // Calculate penalty points based on hint level and difficulty
+    const hints = [
+      { level: 1, penalty: template.difficulty === 'easy' ? 0 : template.difficulty === 'medium' ? 5 : 10 },
+      { level: 2, penalty: template.difficulty === 'easy' ? 5 : template.difficulty === 'medium' ? 10 : 20 },
+      { level: 3, penalty: template.difficulty === 'easy' ? 15 : template.difficulty === 'medium' ? 25 : 40 },
+      { level: 4, penalty: template.difficulty === 'easy' ? 35 : template.difficulty === 'medium' ? 50 : 75 },
+    ];
+    const hint = hints.find(h => h.level === hintLevel);
+    if (hint) {
+      setHintPenaltyPoints(prev => prev + hint.penalty);
     }
   };
 
@@ -289,22 +344,34 @@ const RoomPage: React.FC<RoomPageProps> = ({
           </div>
           
           <Text className="font-body text-sm text-neon-blue">
-            MESSAGES: {messageCount.current}
+            MESSAGES: {gameState.messageCount}
           </Text>
         </div>
 
         <Grid gutter="xl">
-          {/* Left Side - Room Leaderboard */}
+          {/* Left Side - Hint System & Room Leaderboard */}
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <Card className="retro-card neon-glow-purple h-full">
-              <div className="flex items-center gap-3 mb-4">
-                <IconSparkles size={24} className="text-neon-purple" />
-                <Title order={3} className="font-heading text-lg text-neon-purple">
-                  ROOM LEADERS
-                </Title>
-              </div>
-              <Leaderboard entries={leaderboard} showRoom={false} maxHeight={600} />
-            </Card>
+            <div className="space-y-4">
+              {/* Hint System */}
+              <HintSystem
+                template={template}
+                messageCount={gameState.messageCount}
+                timeElapsed={gameState.timeElapsed}
+                onHintUsed={handleHintUsed}
+                lastUserMessage={messages.length > 0 ? messages[messages.length - 2]?.content : ''}
+              />
+              
+              {/* Room Leaderboard */}
+              <Card className="retro-card neon-glow-purple">
+                <div className="flex items-center gap-3 mb-4">
+                  <IconSparkles size={24} className="text-neon-purple" />
+                  <Title order={3} className="font-heading text-lg text-neon-purple">
+                    ROOM LEADERS
+                  </Title>
+                </div>
+                <Leaderboard entries={leaderboard} showRoom={false} maxHeight={400} />
+              </Card>
+            </div>
           </Grid.Col>
 
           {/* Right Side - Chat Interface */}

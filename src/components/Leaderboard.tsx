@@ -1,19 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Text, Badge, ScrollArea } from '@mantine/core';
-import { IconTrophy, IconClock, IconMessages } from '@tabler/icons-react';
+import { Text, Badge, ScrollArea, ActionIcon, Tooltip } from '@mantine/core';
+import { IconTrophy, IconClock, IconMessages, IconEye } from '@tabler/icons-react';
 import { LeaderboardEntry } from '../ArcadeGameApp';
 
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
   showRoom?: boolean;
   maxHeight?: number;
+  onViewConversation?: (entry: LeaderboardEntry) => void;
 }
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ 
   entries, 
   showRoom = false, 
-  maxHeight = 400 
+  maxHeight = 400,
+  onViewConversation
 }) => {
   const formatDuration = (seconds: number) => {
     if (seconds < 60) {
@@ -120,15 +122,29 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
               )}
             </div>
 
-            {/* Stats */}
+            {/* Stats and Actions */}
             <div className="flex-shrink-0 text-right">
-              <div className="flex items-center gap-1 mb-1">
-                <IconMessages size={12} className="text-neon-purple" />
-                <Text className="font-body text-xs text-neon-purple">
-                  {entry.messageCount}
-                </Text>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-1">
+                  <IconMessages size={12} className="text-neon-purple" />
+                  <Text className="font-body text-xs text-neon-purple">
+                    {entry.messageCount}
+                  </Text>
+                </div>
+                {onViewConversation && (
+                  <Tooltip label="View conversation replay">
+                    <ActionIcon
+                      size="xs"
+                      variant="subtle"
+                      className="text-neon-blue hover:text-white hover:bg-neon-blue/20"
+                      onClick={() => onViewConversation(entry)}
+                    >
+                      <IconEye size={12} />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 justify-end">
                 <IconClock size={12} className="text-gray-400" />
                 <Text className="font-body text-xs text-gray-400">
                   {formatDuration(entry.durationSeconds)}
