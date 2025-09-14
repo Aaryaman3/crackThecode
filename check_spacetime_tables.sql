@@ -1,5 +1,5 @@
 -- SpacetimeDB Table Inspection Queries
--- Run these queries to check all tables in the hophacks-chat module
+-- Run these queries to check all tables in the crackthecode module
 
 -- 1. Check AiReplies table
 -- Contains AI responses and analysis data

@@ -17,8 +17,8 @@ class RedTeamBotConnected {
     
     try {
       this.conn = DbConnection.builder()
-        .withUri('ws://localhost:3000')
-        .withModuleName('hophacks-chat')
+        .withUri('wss://maincloud.spacetimedb.com')
+        .withModuleName('crackthecode')
         .onConnect((conn, identity, token) => {
           console.log('✅ Bot connected with identity:', identity.toHexString());
           this.isConnected = true;

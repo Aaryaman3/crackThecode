@@ -30,7 +30,7 @@ tables.forEach(table => {
     console.log(`   Query: ${countQuery}`);
     
     // Since we don't have direct access, let's show what queries you should run
-    console.log(`   Run: spacetime sql hophacks-chat "${countQuery}"`);
+    console.log(`   Run: spacetime sql crackthecode "${countQuery}"`);
     console.log('');
     
   } catch (error) {
@@ -43,13 +43,13 @@ console.log('========================');
 
 tables.forEach(table => {
   console.log(`\n# Check ${table} table:`);
-  console.log(`spacetime sql hophacks-chat "SELECT COUNT(*) FROM ${table}"`);
-  console.log(`spacetime sql hophacks-chat "SELECT * FROM ${table} LIMIT 3"`);
+  console.log(`spacetime sql crackthecode "SELECT COUNT(*) FROM ${table}"`);
+  console.log(`spacetime sql crackthecode "SELECT * FROM ${table} LIMIT 3"`);
 });
 
 console.log('\n🔍 Complete database summary:');
 const summaryQuery = `SELECT ${tables.map(t => `(SELECT COUNT(*) FROM ${t}) as ${t.toLowerCase()}`).join(', ')}`;
-console.log(`spacetime sql hophacks-chat "${summaryQuery}"`);
+console.log(`spacetime sql crackthecode "${summaryQuery}"`);
 
 console.log('\n💡 If all tables show 0 rows, the React app is not connected to SpacetimeDB properly.');
 console.log('   Check if reducers are being called in RoomPage.tsx');

@@ -152,8 +152,8 @@ const ArcadeGameApp: React.FC = () => {
     const initConnection = async () => {
       try {
         DbConnection.builder()
-          .withUri('ws://localhost:3000')
-          .withModuleName('hophacks-chat')
+          .withUri('wss://maincloud.spacetimedb.com')
+          .withModuleName('crackthecode')
           .withToken(localStorage.getItem('auth_token') || '')
           .onConnect((conn, _identity, token) => {
             setConnection(conn);

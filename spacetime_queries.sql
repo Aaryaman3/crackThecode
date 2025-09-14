@@ -5,7 +5,7 @@ SpacetimeDB Table Check Queries
 Copy and paste these queries into the SpacetimeDB console or CLI to check all tables.
 
 Usage:
-spacetime sql hophacks-chat "QUERY_HERE"
+spacetime sql crackthecode "QUERY_HERE"
 
 Or if you have access to the SpacetimeDB web console, paste each query individually.
 */

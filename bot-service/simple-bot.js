@@ -61,7 +61,7 @@ class SimpleRedTeamBot {
       try {
         // Use spacetime CLI to query for unprocessed messages
         const { spawn } = require('child_process');
-        const spacetime = spawn('spacetime', ['sql', 'hophacks-chat', 
+        const spacetime = spawn('spacetime', ['sql', 'crackthecode', 
           'SELECT m.id, m.room_id, m.text, gr.template_id FROM messages m JOIN game_rooms gr ON m.room_id = gr.room_id WHERE m.processing = true AND m.message_type = \'attack\''
         ], { 
           env: { ...process.env, PATH: `/Users/aaryamanbajaj/.local/bin:${process.env.PATH}` },
@@ -250,7 +250,7 @@ Respond in JSON format:
       
       // Prepare the arguments for the reducer call
       const args = [
-        'call', 'hophacks-chat', 'process_ai_response',
+        'call', 'crackthecode', 'process_ai_response',
         messageId,
         `"${cleanResponse}"`,
         vulnerability ? `"${vulnerability}"` : 'null',

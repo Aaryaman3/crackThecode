@@ -203,8 +203,8 @@ function App() {
     };
 
     const connection = DbConnection.builder()
-      .withUri('ws://localhost:3000')
-      .withModuleName('hophacks-chat')
+      .withUri('wss://maincloud.spacetimedb.com')
+      .withModuleName('crackthecode')
       .withToken(localStorage.getItem('auth_token') || '')
       .onConnect(onConnect)
       .onDisconnect(onDisconnect)

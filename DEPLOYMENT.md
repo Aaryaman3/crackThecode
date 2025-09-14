@@ -19,7 +19,7 @@ Your app now runs as a **unified service** that serves both the frontend and API
 
 ```bash
 # Make sure SpacetimeDB is running first
-cd server-rs && spacetime serve hophacks-chat
+cd server-rs && spacetime serve crackthecode
 
 # Then start the unified server
 npm start                  # Builds + starts unified server on port 3001
@@ -64,7 +64,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
 RUN npm run build
-EXPOSE 3000
+EXPOSE 3001
 CMD ["npm", "start"]
 ```
 
@@ -75,7 +75,7 @@ Make sure these are set in production:
 OPENAI_API_KEY=your_openai_api_key
 PORT=3001                   # Unified server port (SpacetimeDB uses 3000)
 NODE_ENV=production         # Optional
-SPACETIMEDB_URL=ws://localhost:3000  # SpacetimeDB connection
+SPACETIMEDB_URL=wss://maincloud.spacetimedb.com  # SpacetimeDB connection
 ```
 
 ## 📡 API Endpoints
@@ -83,7 +83,7 @@ SPACETIMEDB_URL=ws://localhost:3000  # SpacetimeDB connection
 - `GET /` - React frontend (port 3001)
 - `POST /api/chat` - AI chat endpoint (port 3001)
 - `GET /api/health` - Health check (port 3001)
-- `ws://localhost:3000` - SpacetimeDB connection
+- `wss://maincloud.spacetimedb.com` - SpacetimeDB connection
 - `GET /*` - Fallback to React (client-side routing)
 
 ## ✅ Benefits

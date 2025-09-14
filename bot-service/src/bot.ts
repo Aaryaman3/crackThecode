@@ -28,8 +28,8 @@ class RedTeamBot {
     try {
       console.log('🤖 RedTeam Bot starting up...');
       
-      const dbUrl = process.env.SPACETIMEDB_URL || 'ws://localhost:3000';
-      const moduleName = process.env.SPACETIMEDB_DB_NAME || 'hophacks-chat';
+      const dbUrl = process.env.SPACETIMEDB_URL || 'wss://maincloud.spacetimedb.com';
+      const moduleName = process.env.SPACETIMEDB_DB_NAME || 'crackthecode';
       
       console.log(`Connecting to SpacetimeDB at ${dbUrl} with module ${moduleName}`);
       

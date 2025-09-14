@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # SpacetimeDB Table Check Script
-# This script runs SQL queries to inspect all tables in the hophacks-chat database
+# This script runs SQL queries to inspect all tables in the crackthecode database
 
-echo "🔍 Checking SpacetimeDB Tables for hophacks-chat module..."
+echo "🔍 Checking SpacetimeDB Tables for crackthecode module..."
 echo "=============================================="
 
 # Check if spacetime CLI is available
@@ -14,7 +14,7 @@ if ! command -v spacetime &> /dev/null; then
 fi
 
 # Database connection details
-MODULE_NAME="hophacks-chat"
+MODULE_NAME="crackthecode"
 HOST="localhost:3000"
 
 echo "📊 Connecting to SpacetimeDB at $HOST..."

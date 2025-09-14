@@ -6,7 +6,7 @@ const { execSync } = require('child_process');
 console.log('🔍 SpacetimeDB Table Inspector');
 console.log('=====================================');
 
-const MODULE_NAME = 'hophacks-chat';
+const MODULE_NAME = 'crackthecode';
 const tables = [
   'AiReplies',
   'GameResult', 
