@@ -4,8 +4,12 @@ import {
   DbConnection,
   ErrorContext,
   EventContext,
-  Message,
-  User,
+  Messages,
+  Users,
+  GameRooms,
+  RoomTemplate,
+  AiReplies,
+  Leaderboard,
 } from './module_bindings';
 import { Identity } from '@clockworklabs/spacetimedb-sdk';
 
@@ -132,7 +136,7 @@ function App() {
       DbConnection.builder()
         .withUri('ws://localhost:3000')
 
-        .withModuleName('newchat')
+        .withModuleName('hophacks-chat')
         .withToken(localStorage.getItem('auth_token') || '')
         .onConnect(onConnect)
         .onDisconnect(onDisconnect)
